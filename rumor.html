@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Real or Rumour?</title>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,800&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F7F3;--s:#fff;--ink:#0D1F16;--mu:#5A6B61;--ln:#DCE5DD;--g:#0B7A43;--g2:#34C07A;--r:#D14343;--gold:#E7B63B;--hero:#06291A;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root{color-scheme:dark;--bg:#07130D;--s:#0E2218;--ink:#E8F3EC;--mu:#8FA597;--ln:#1E3A2B;--g:#34C07A;--g2:#6EE0A3;--r:#F27A7A;--hero:#0A2E1C}}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%}
+body{background:var(--bg);color:var(--ink);font:17px/1.5 "DM Sans",system-ui,sans-serif;display:flex;justify-content:center}
+#app{width:100%;max-width:480px;min-height:100vh;display:flex;flex-direction:column;padding:16px 18px 24px}
+.top{display:flex;justify-content:space-between;align-items:center;font-size:13px;color:var(--mu)}.top b{font:800 18px Fraunces,serif;color:var(--ink)}
+.serif{font-family:Fraunces,Georgia,serif;font-weight:800}
+.wrap{flex:1;display:flex;flex-direction:column;justify-content:center;gap:16px;padding:18px 0}
+h1{font:800 clamp(40px,12vw,56px)/1 Fraunces,serif;margin:0;letter-spacing:-.02em}
+.lead{color:var(--mu);margin:0}
+.btn{width:100%;border:0;border-radius:16px;padding:16px;font:700 17px "DM Sans",sans-serif;cursor:pointer;color:#fff;background:var(--g)}
+.btn.o{background:var(--s);color:var(--ink);border:1px solid var(--ln)}
+button:focus-visible,a:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.prog{height:8px;background:var(--ln);border-radius:9px;overflow:hidden}.prog i{display:block;height:100%;background:var(--g2);transition:width .3s}
+.hud{display:flex;justify-content:space-between;font-size:14px;color:var(--mu);margin:8px 0 0}
+.stage{position:relative;flex:1;display:flex;align-items:center;min-height:240px}
+.card{width:100%;background:var(--s);border:1px solid var(--ln);border-radius:26px;padding:28px 22px;box-shadow:0 10px 30px rgba(6,41,26,.12);touch-action:pan-y;user-select:none;cursor:grab}
+.card .q{font:800 clamp(24px,6.5vw,30px)/1.2 Fraunces,serif}.card small{color:var(--mu);display:block;margin-bottom:10px;letter-spacing:.05em;text-transform:uppercase;font-weight:700;font-size:12px}
+.hint{display:flex;justify-content:space-between;color:var(--mu);font-size:13px;margin-top:10px}
+.ans{display:grid;grid-template-columns:1fr 1fr;gap:12px}.ans .btn.r{background:var(--r)}
+.fb{border-radius:22px;padding:18px;background:var(--s);border:2px solid var(--g);margin-top:8px}.fb.bad{border-color:var(--r)}
+.fb h2{font:800 26px Fraunces,serif;margin:0 0 6px}.fb p{margin:6px 0}.fb a{color:var(--g);font-weight:700}
+.score{font:800 80px/1 Fraunces,serif}
+.rev{display:flex;gap:10px;font-size:14px;margin:8px 0;align-items:flex-start}.rev i{font-style:normal;flex:none}
+.credit{text-align:center;font-size:13px;color:var(--mu);margin-top:12px}.credit a{color:var(--g);font-weight:700}
+.demo{background:#FEF3C7;color:#78350F;font-size:12px;text-align:center;padding:6px;border-radius:8px;margin-bottom:10px}
+.hide{display:none!important}.msg{text-align:center;color:var(--mu);font-size:14px;min-height:20px}
+@media(prefers-reduced-motion:reduce){*{transition:none!important}}
+</style></head><body><div id="app">
+<div class="top"><b>Real or Rumour?</b><span>by Gist Meter</span></div>
+<div id="start" class="wrap hide"><h1>Real or<br>Rumour?</h1><p class="lead">Claims going round Nigeria, checked by people. Swipe right for real, left for rumour, or tap a button. Can you beat your friends?</p><button class="btn" id="go">Play</button></div>
+<div id="empty" class="wrap hide"><h1>Check back soon</h1><p class="lead" id="emsg">We need more checked claims before the game can start.</p><a class="btn o" style="text-align:center;text-decoration:none" href="/">Visit Gist Meter</a></div>
+<div id="play" class="hide" style="flex:1;display:none;flex-direction:column">
+ <div class="hud"><span id="pc"></span><span id="st"></span></div><div class="prog"><i id="pb"></i></div>
+ <div class="stage"><div class="card" id="card"><small>Is this real?</small><div class="q" id="q"></div></div></div>
+ <div class="hint"><span>\u2190 Rumour</span><span>Real \u2192</span></div>
+ <div class="ans" id="ans"><button class="btn r" data-a="rumour">Rumour</button><button class="btn" data-a="real">Real</button></div>
+ <div id="fb" class="fb hide" aria-live="polite"></div>
+</div>
+<div id="end" class="wrap hide"><div class="lead">Your score</div><div class="score" id="sc"></div><h1 style="font-size:32px" id="lab"></h1><div id="rv"></div>
+ <button class="btn" id="sh">Share my score</button><div class="msg" id="mg"></div><button class="btn o" id="again">Play again</button></div>
+<div class="credit">Verified by <a href="/">Gist Meter</a>. Every verdict is reviewed by a person. Game scores are for fun.</div>
+</div><script>
+var N=10,Q=[],i=0,score=0,streak=0,locked=false,miss=[],$=function(x){return document.getElementById(x)};
+function show(id){["start","empty","end"].forEach(function(s){$(s).classList.toggle("hide",s!==id)});$("play").style.display=id==="play"?"flex":"none"}
+function load(){fetch("/api/game/rumors?n="+N).then(function(r){return r.json()}).then(function(d){Q=d;if(Q.length<5){$("emsg").textContent="We need at least five checked claims to start. Visit Gist Meter in the meantime.";show("empty")}else show("start")}).catch(function(){$("emsg").textContent="Could not load the game. Try again shortly.";show("empty")})}
+function start(){i=0;score=0;streak=0;miss=[];show("play");next()}
+function next(){locked=false;var c=$("card");c.style.transition="none";c.style.transform="";c.style.opacity=1;$("q").textContent=Q[i].claim;$("pc").textContent=(i+1)+" of "+Q.length;$("st").textContent=streak>1?"\uD83D\uDD25 "+streak+" in a row":"";$("pb").style.width=(i/Q.length*100)+"%";$("fb").classList.add("hide");$("ans").classList.remove("hide")}
+function answer(a){if(locked)return;locked=true;var q=Q[i],ok=a===q.answer;if(ok){score++;streak++}else{streak=0;miss.push(q)}
+ var fb=$("fb");fb.className="fb"+(ok?"":" bad");fb.innerHTML="";var h=document.createElement("h2");h.textContent=(ok?"Correct. ":"Not quite. ")+"It’s "+(q.answer==="real"?"real":"a rumour");fb.appendChild(h);
+ if(q.note){var p=document.createElement("p");p.textContent=q.note;fb.appendChild(p)}
+ if(q.source_url&&/^https?:\/\//.test(q.source_url)){var l=document.createElement("a");l.href=q.source_url;l.target="_blank";l.rel="noopener";l.textContent="See the source";fb.appendChild(l)}
+ var b=document.createElement("button");b.className="btn";b.style.marginTop="12px";b.textContent=i+1<Q.length?"Next":"See my score";b.onclick=function(){i++;i<Q.length?next():finish()};fb.appendChild(b);
+ $("ans").classList.add("hide");fb.classList.remove("hide");b.focus();$("st").textContent=streak>1?"\uD83D\uDD25 "+streak+" in a row":""}
+function finish(){show("end");$("sc").textContent=score+"/"+Q.length;var r=score/Q.length;$("lab").textContent=r>=.9?"Rumour slayer":r>=.7?"Sharp eye":r>=.4?"Getting there":"Easy to fool. Now you know.";
+ $("rv").innerHTML="";miss.forEach(function(q){var d=document.createElement("div");d.className="rev";var s=document.createElement("i");s.textContent=q.answer==="real"?"\u2705":"\u274C";var t=document.createElement("span");t.textContent=q.claim+" (it’s "+(q.answer==="real"?"real":"a rumour")+")";d.appendChild(s);d.appendChild(t);$("rv").appendChild(d)})}
+function msg(t){$("mg").textContent=t}
+function share(){var t="I got "+score+"/"+Q.length+" on Real or Rumour? Can you beat me?",u=location.href.split("#")[0];
+ if(navigator.share){navigator.share({title:"Real or Rumour?",text:t,url:u}).catch(function(){})}else{try{navigator.clipboard.writeText(t+" "+u).then(function(){msg("Copied. Paste it into WhatsApp.")},function(){msg("Copy this: "+t+" "+u)})}catch(e){msg("Copy this: "+t+" "+u)}}}
+$("go").onclick=start;$("again").onclick=function(){load()};$("sh").onclick=share;
+$("ans").onclick=function(e){var b=e.target.closest("[data-a]");if(b)answer(b.dataset.a)};
+document.addEventListener("keydown",function(e){if($("play").style.display!=="flex"||$("fb").classList.contains("hide")===false)return;if(e.key==="ArrowLeft")answer("rumour");if(e.key==="ArrowRight")answer("real")});
+(function(){var c=$("card"),x0=null,dx=0;c.addEventListener("pointerdown",function(e){if(locked)return;x0=e.clientX;dx=0;c.setPointerCapture(e.pointerId);c.style.transition="none"});
+ c.addEventListener("pointermove",function(e){if(x0===null)return;dx=e.clientX-x0;c.style.transform="translateX("+dx+"px) rotate("+dx/20+"deg)"});
+ function up(){if(x0===null)return;x0=null;c.style.transition="transform .25s";if(Math.abs(dx)>90){answer(dx>0?"real":"rumour")}c.style.transform=""}
+ c.addEventListener("pointerup",up);c.addEventListener("pointercancel",up)})();
+load();
+</script></body></html>
