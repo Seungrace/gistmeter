@@ -14,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 MODEL = "claude-sonnet-5-5"            # claim checking (needs web search)
 SCORE_MODEL = os.environ.get("SCORE_MODEL", "claude-haiku-5-5")  # cheaper model for tone scoring
 ELECTION_DATE = "2027-01-16"  # confirm on inec.gov.ng; INEC has revised dates before
+ELECTION_MODE = os.environ.get("ELECTION_MODE", "off") == "on"  # set to "on" to show the countdown
 SCAN_EVERY = 600              # seconds
 SOCIAL_EVERY = 1800           # seconds, protects API quotas
 MAX_VERIFY = 2                # new claims checked per scan (controls cost)
@@ -73,9 +74,9 @@ def analyze():
         return []
     listing = "\n".join(f"{i}. {t}" for i, (_, t, _p) in enumerate(rows))
     out = parse_json(ask(
-        "These are Nigerian news headlines and public social media posts. For each, return a JSON list "
+        "These are Nigerian news headlines and public social media posts on any subject. For each, return a JSON list "
         'of objects {"i":int,"kind":"news"|"opinion","tone":-100..100 (mood of the coverage),'
-        '"topic":"Security"|"Economy"|"Electoral process"|"Candidates and parties"|"Governance"|"Other","state":"the one Nigerian state the story is mainly about, or null","claim":"a specific, checkable factual claim or null"}. '
+        '"topic":"Politics"|"Elections"|"Economy"|"Security"|"Energy"|"Health"|"Business"|"Education"|"Sports"|"Entertainment"|"Other","state":"the one Nigerian state the story is mainly about, or null","claim":"a specific, checkable factual claim or null"}. '
         "Return JSON only.\n" + listing, model=SCORE_MODEL)) or []
     claims = []
     for o in out:
@@ -203,7 +204,7 @@ def stats(days: int = 7):
     tot = sum(c for (c,) in soc)
     dup = sum(c for (c,) in soc if c >= 3)
     return {"sources": src, "social_dup": round(dup / tot, 3) if tot else None,
-            "election_date": ELECTION_DATE, "days": days, "n": n, "tone": tone, "tone_ci": tci,
+            "election_date": ELECTION_DATE if ELECTION_MODE else None, "days": days, "n": n, "tone": tone, "tone_ci": tci,
             "topics": sorted(topics, key=lambda x: -x["n"]),
             "states": sorted(states, key=lambda x: -x["n"]), "daily": daily, "claims": cl}
 
